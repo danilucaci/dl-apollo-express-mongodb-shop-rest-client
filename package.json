@@ -1,0 +1,44 @@
+{
+  "name": "dl-apollo-express-mongodb-shop-rest-client",
+  "version": "1.0.0",
+  "private": true,
+  "author": "Dani Lucaci <danilucaci@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@testing-library/jest-dom": "^4.2.4",
+    "@testing-library/react": "^9.4.0",
+    "@testing-library/user-event": "^8.0.2",
+    "antd": "^3.26.4",
+    "axios": "^0.19.1",
+    "bootstrap": "^4.4.1",
+    "dotenv": "^8.2.0",
+    "firebase": "^7.6.1",
+    "firebase-admin": "^8.9.0",
+    "react": "^16.12.0",
+    "react-bootstrap": "^1.0.0-beta.16",
+    "react-dom": "^16.12.0",
+    "react-router-dom": "^5.1.2",
+    "react-scripts": "3.3.0"
+  },
+  "scripts": {
+    "dev": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

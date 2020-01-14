@@ -1,0 +1,19 @@
+.ItemsRow:last-of-type .ItemsDivider {
+  display: none;
+}
+
+@media screen and (min-width: 36em) {
+  .CartItemHeight {
+    height: 100%;
+  }
+
+  .CartItemRemoveButton {
+    margin-top: auto;
+  }
+}
+
+@media screen and (max-width: 36em) {
+  .CartItemRemoveButton {
+    margin-top: 0.5rem;
+  }
+}
