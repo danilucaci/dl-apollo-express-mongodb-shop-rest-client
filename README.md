@@ -1,12 +1,12 @@
-# dl-apollo-express-mongodb-shop-client
+# dl-apollo-express-mongodb-shop-rest-client
 
-Client for the fullstack graphql demo clothing store project made with Apollo
-Client & Server, React, Firebase Auth, MongoDB and Mongoose.
+REST based client for the fullstack graphql demo clothing store project made
+with Apollo Client & Server, React, Firebase Auth, MongoDB and Mongoose.
 
 <h3 align="center">
   <a href="https://github.com/danilucaci/dl-apollo-express-mongodb-shop-client">Apollo Client Front-End</a>
   <span> · </span>
-  <a href="https://github.com/danilucaci/dl-apollo-express-mongodb-shop-rest-client">Rest Front-End</a>
+  <a href="https://github.com/danilucaci/dl-apollo-express-mongodb-shop-rest-client">REST based Front-End</a>
   <span> · </span>
   <a href="https://github.com/danilucaci/dl-apollo-express-mongodb-shop-server">Server</a>
 </h3>
