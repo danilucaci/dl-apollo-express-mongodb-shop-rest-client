@@ -265,15 +265,17 @@ function Cart() {
     }
 
     await axios({
-      url: `http://localhost:4000/api/cart?id=${id}&quantity=${quantity}`,
+      url: `http://localhost:4000/api/cart/${id}`,
       method: "patch",
-      headers:
-        isAuthenticated && userToken
-          ? {
-              Authorization: `Bearer ${userToken}`,
-            }
-          : null,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization:
+          isAuthenticated && userToken ? `Bearer ${userToken}` : ``,
+      },
       cancelToken: updateCartItemCancelToken.current.token,
+      data: JSON.stringify({
+        quantity: quantity,
+      }),
       validateStatus: (_status) => {
         // Fix for Axios not returning response for POST on 500 error
         // @see https://github.com/axios/axios#request-config
