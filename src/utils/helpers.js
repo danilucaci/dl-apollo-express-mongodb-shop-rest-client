@@ -54,3 +54,23 @@ export function formatOrderDate(date) {
 export function getCartSize(arr = []) {
   return arr.reduce((accum, curr) => accum + curr.quantity, 0);
 }
+
+/**
+ * Calls the functions from right to left with the result of calling the `useReducer` hook.
+ *
+ * Same as calling: const [state, dispatch] = useThunk(useLogger(useReducer(reducer, initialState)));
+ *
+ * @param {Array} Functions The functions to call with the result of calling the `useReducer` hook
+ * @param {Array} [state, dispatch] The result of calling the `useReducer` hook
+ *
+ * @example
+ * const [state, dispatch] = composeReducers(
+ *   useThunk,
+ *   useLogger,
+ *   useReducer(reducer, initialState),
+ * );
+ *
+ */
+export function composeReducers(...fns) {
+  return fns.reduceRight(([state, dispatch], fn) => fn([state, dispatch]));
+}

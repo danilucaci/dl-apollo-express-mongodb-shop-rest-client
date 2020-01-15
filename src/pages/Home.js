@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { Layout, Typography, Spin, Row, Col, Button } from "antd";
 import { Link } from "react-router-dom";
 import Image from "react-bootstrap/Image";
@@ -13,85 +13,12 @@ import useShopItems from "../hooks/useShopItems";
 const { Content } = Layout;
 const { Paragraph } = Typography;
 
-const BASE_URL = "http://localhost:4000/shop-items?limit=8";
-
 function Home() {
   const [
-    { dataFetched, shopItems, hasNextPage, loading, error },
+    { shopItems, hasNextPage, loading, error },
     dispatch,
-    types,
+    { fetchMore } = {},
   ] = useShopItems();
-  const mounted = useRef();
-
-  useEffect(() => {
-    mounted.current = true;
-
-    return () => (mounted.current = false);
-  });
-
-  useEffect(() => {
-    async function fetchShopItems() {
-      dispatch({ type: types.FETCH_START });
-
-      const res = await fetch(BASE_URL).catch((e) =>
-        dispatch({ type: types.ERROR }),
-      );
-
-      if (res.ok) {
-        const data = await res
-          .json()
-          .catch((e) => dispatch({ type: types.ERROR }));
-        const { data: { shopItems, hasNextPage } = {}, errors } = data || {};
-
-        if (errors) {
-          dispatch({ type: types.ERROR });
-        }
-
-        dispatch({
-          type: types.FETCH_DONE,
-          payload: {
-            hasNextPage: hasNextPage,
-            shopItems: shopItems,
-          },
-        });
-      }
-    }
-
-    if (!dataFetched && mounted.current === true) {
-      fetchShopItems();
-    }
-  }, [dataFetched, dispatch, types.ERROR, types.FETCH_DONE, types.FETCH_START]);
-
-  async function fetchMore() {
-    dispatch({ type: types.FETCH_START });
-
-    if (hasNextPage) {
-      const afterItem = shopItems.slice(-1)[0];
-
-      const res = await fetch(`${BASE_URL}&after=${afterItem.id}`).catch((e) =>
-        dispatch({ type: types.ERROR }),
-      );
-
-      if (res.ok) {
-        const data = await res
-          .json()
-          .catch((e) => dispatch({ type: types.ERROR }));
-        const { data: { shopItems, hasNextPage } = {}, errors } = data || {};
-
-        if (errors) {
-          dispatch({ type: types.ERROR });
-        }
-
-        dispatch({
-          type: types.FETCHED_MORE,
-          payload: {
-            hasNextPage: hasNextPage,
-            shopItems: shopItems,
-          },
-        });
-      }
-    }
-  }
 
   return (
     <Layout style={{ background: "#f3f3f3" }}>
@@ -164,7 +91,7 @@ function Home() {
                     }}
                     loading={loading}
                     disabled={loading || !hasNextPage}
-                    onClick={fetchMore}
+                    onClick={() => dispatch(fetchMore(hasNextPage))}
                   >
                     {hasNextPage ? "Load more" : "No more results"}
                   </Button>

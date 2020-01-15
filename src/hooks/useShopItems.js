@@ -1,60 +1,28 @@
-import { useReducer } from "react";
+import useShopItemsReducer from "./useShopItemsReducer";
+import { useEffect } from "react";
 
+/**
+ * Shop items state hook.
+ *
+ * @returns [state, dispatch, actions, types]
+ */
 function useShopItems() {
-  const types = {
-    FETCH_START: "FETCH_START",
-    FETCH_DONE: "FETCH_DONE",
-    FETCHED_MORE: "FETCHED_MORE",
-    ERROR: "ERROR",
-  };
+  const [state, dispatch, actions, types] = useShopItemsReducer();
 
-  const initialState = {
-    dataFetched: false,
-    shopItems: null,
-    hasNextPage: false,
-    loading: false,
-    error: false,
-  };
+  const { dataFetched } = state;
+  const { fetchShopItems } = actions;
 
-  const reducer = (state, { type, payload }) => {
-    switch (type) {
-      case types.FETCH_START: {
-        return {
-          ...state,
-          loading: true,
-        };
-      }
-      case types.FETCH_DONE: {
-        return {
-          ...state,
-          loading: false,
-          dataFetched: true,
-          hasNextPage: payload.hasNextPage,
-          shopItems: payload.shopItems,
-        };
-      }
-      case types.FETCHED_MORE: {
-        return {
-          ...state,
-          loading: false,
-          hasNextPage: payload.hasNextPage,
-          shopItems: [...state.shopItems, ...payload.shopItems],
-        };
-      }
-      case types.ERROR: {
-        return {
-          ...state,
-          error: true,
-        };
-      }
-      default:
-        return state;
+  useEffect(() => {
+    let mounted = true;
+
+    if (!dataFetched && mounted) {
+      dispatch(fetchShopItems());
     }
-  };
 
-  const [state, dispatch] = useReducer(reducer, initialState);
+    return () => (mounted = false);
+  }, [dataFetched, dispatch, fetchShopItems]);
 
-  return [state, dispatch, types];
+  return [state, dispatch, actions, types];
 }
 
 export default useShopItems;

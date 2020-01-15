@@ -1,5 +1,4 @@
-import React, { useEffect, useContext, useReducer, useRef } from "react";
-import axios from "axios";
+import React, { useEffect, useContext } from "react";
 import {
   Layout,
   Spin,
@@ -26,101 +25,18 @@ import withProtectedRoute from "../hoc/withProtectedRoute";
 import routes from "../utils/routes";
 import { CartContext } from "../context/cart";
 import { LocalAuthContext } from "../context/localAuth";
-import useFirebaseAuth from "../hooks/useFirebaseAuth";
-import useCart from "../hooks/useCart";
+import useLocalCart from "../hooks/useLocalCart";
 const { Content } = Layout;
 const { Option } = Select;
 
 const { Paragraph, Title, Text } = Typography;
 const quantityValues = Array.from({ length: 10 }, (_, i) => i + 1);
 
-const types = {
-  DELETE_CART_ITEM_LOADING: "DELETE_CART_ITEM_LOADING",
-  DELETE_CART_ITEM_DELETED: "DELETE_CART_ITEM_DELETED",
-  DELETE_CART_ITEM_ERROR: "DELETE_CART_ITEM_ERROR",
-  ADD_ORDER_LOADING: "ADD_ORDER_LOADING",
-  ADD_ORDER_ERROR: "ADD_ORDER_ERROR",
-  ADD_ORDER_ADDED: "ADD_ORDER_ADDED",
-  UPDATE_CART_ITEM_LOADING: "UPDATE_CART_ITEM_LOADING",
-  UPDATE_CART_ITEM_UPDATED: "UPDATE_CART_ITEM_UPDATED",
-  UPDATE_CART_ITEM_ERROR: "UPDATE_CART_ITEM_ERROR",
-};
-
-const initialState = {
-  deleteCartItemLoading: false,
-  deleteCartItemError: null,
-  addOrderLoading: false,
-  addOrderError: null,
-  addOrderAdded: false,
-  updateCartItemLoading: false,
-  updateCartItemError: null,
-};
-
-const reducer = (state, { type, payload }) => {
-  switch (type) {
-    case types.DELETE_CART_ITEM_LOADING: {
-      return {
-        ...state,
-        deleteCartItemLoading: true,
-      };
-    }
-    case types.DELETE_CART_ITEM_DELETED: {
-      return {
-        ...state,
-        deleteCartItemLoading: false,
-      };
-    }
-    case types.DELETE_CART_ITEM_ERROR: {
-      return {
-        ...state,
-        deleteCartItemLoading: false,
-      };
-    }
-    case types.ADD_ORDER_LOADING: {
-      return {
-        ...state,
-        addOrderLoading: true,
-      };
-    }
-    case types.ADD_ORDER_ADDED: {
-      return {
-        ...state,
-        addOrderLoading: false,
-        addOrderAdded: true,
-      };
-    }
-    case types.ADD_ORDER_ERROR: {
-      return {
-        ...state,
-        addOrderError: payload,
-      };
-    }
-    case types.UPDATE_CART_ITEM_LOADING: {
-      return {
-        ...state,
-        updateCartItemLoading: true,
-      };
-    }
-    case types.UPDATE_CART_ITEM_UPDATED: {
-      return {
-        ...state,
-        updateCartItemLoading: false,
-      };
-    }
-    case types.UPDATE_CART_ITEM_ERROR: {
-      return {};
-    }
-    default: {
-      return state;
-    }
-  }
-};
-
 function Cart() {
   const {
     cart: { cart, loading: cartLoading, error: cartError },
     dispatch: cartDispatch,
-    types: cartTypes,
+    actions: { updateLocalCartItem, deleteLocalCartItem, resetCart },
   } = useContext(CartContext);
 
   const {
@@ -131,18 +47,6 @@ function Cart() {
     } = {},
   } = useContext(LocalAuthContext);
 
-  const mounted = useRef();
-
-  useEffect(() => {
-    mounted.current = true;
-
-    return () => (mounted.current = false);
-  });
-
-  const addOrderCancelToken = useRef();
-  const deleteCartItemCancelToken = useRef();
-  const updateCartItemCancelToken = useRef();
-
   const [
     {
       deleteCartItemLoading,
@@ -152,178 +56,10 @@ function Cart() {
       updateCartItemLoading,
     },
     dispatch,
-  ] = useReducer(reducer, initialState);
+    { deleteCartItem, addOrder, updateCartItem },
+  ] = useLocalCart();
 
   const history = useHistory();
-
-  async function deleteCartItem(id) {
-    deleteCartItemCancelToken.current = axios.CancelToken.source();
-
-    if (mounted.current) {
-      dispatch({ type: types.DELETE_CART_ITEM_LOADING });
-    }
-
-    await axios({
-      url: `http://localhost:4000/api/cart/${id}`,
-      method: "delete",
-      headers:
-        isAuthenticated && userToken
-          ? {
-              Authorization: `Bearer ${userToken}`,
-            }
-          : null,
-      cancelToken: deleteCartItemCancelToken.current.token,
-      validateStatus: (_status) => {
-        // Fix for Axios not returning response for POST on 500 error
-        // @see https://github.com/axios/axios#request-config
-        return true;
-      },
-    }).catch((error) => {
-      if (axios.isCancel(error)) {
-        console.warn("Cancelled axios request");
-      }
-
-      console.warn(error.message);
-
-      if (mounted.current) {
-        dispatch({
-          type: types.DELETE_CART_ITEM_ERROR,
-          payload: error.message,
-        });
-      }
-    });
-
-    if (mounted.current) {
-      dispatch({ type: types.DELETE_CART_ITEM_DELETED });
-
-      cartDispatch({
-        type: cartTypes.DELETE_CART_ITEM,
-        payload: {
-          id: id,
-        },
-      });
-    }
-  }
-
-  async function addOrder() {
-    addOrderCancelToken.current = axios.CancelToken.source();
-
-    if (currentLocalUserID) {
-      if (mounted.current) {
-        dispatch({ type: types.ADD_ORDER_LOADING });
-      }
-
-      await axios({
-        url: `http://localhost:4000/api/orders`,
-        method: "post",
-        headers:
-          isAuthenticated && userToken
-            ? {
-                Authorization: `Bearer ${userToken}`,
-              }
-            : null,
-        cancelToken: addOrderCancelToken.current.token,
-        validateStatus: (status) => {
-          // @see https://github.com/axios/axios#request-config
-          if (status === 201) {
-            return true;
-          }
-          if (status > 400) {
-            return false;
-          }
-        },
-      }).catch((error) => {
-        if (axios.isCancel(error)) {
-          console.warn("Cancelled axios request");
-        }
-
-        console.warn(error.message);
-
-        if (mounted.current) {
-          dispatch({
-            type: types.ADD_ORDER_ERROR,
-            payload: error.message,
-          });
-        }
-      });
-
-      if (mounted.current) {
-        cartDispatch({
-          type: cartTypes.RESET_CART,
-        });
-
-        dispatch({ type: types.ADD_ORDER_ADDED });
-      }
-    }
-  }
-
-  async function updateCartItem({ id, quantity }) {
-    updateCartItemCancelToken.current = axios.CancelToken.source();
-
-    if (mounted.current) {
-      dispatch({ type: types.UPDATE_CART_ITEM_LOADING });
-    }
-
-    await axios({
-      url: `http://localhost:4000/api/cart/${id}`,
-      method: "patch",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization:
-          isAuthenticated && userToken ? `Bearer ${userToken}` : ``,
-      },
-      cancelToken: updateCartItemCancelToken.current.token,
-      data: JSON.stringify({
-        quantity: quantity,
-      }),
-      validateStatus: (_status) => {
-        // Fix for Axios not returning response for POST on 500 error
-        // @see https://github.com/axios/axios#request-config
-        return true;
-      },
-    }).catch((error) => {
-      if (axios.isCancel(error)) {
-        console.warn("Cancelled axios request");
-      }
-
-      console.warn(error.message);
-
-      if (mounted.current) {
-        dispatch({
-          type: types.UPDATE_CART_ITEM_ERROR,
-          payload: error.message,
-        });
-      }
-    });
-
-    if (mounted.current) {
-      dispatch({ type: types.UPDATE_CART_ITEM_UPDATED });
-
-      cartDispatch({
-        type: cartTypes.UPDATE_CART_ITEM,
-        payload: {
-          id: id,
-          quantity: quantity,
-        },
-      });
-    }
-  }
-
-  // useEffect(() => {
-  //   return () => {
-  //     if (updateCartItemCancelToken.current) {
-  //       updateCartItemCancelToken.current.cancel();
-  //     }
-
-  //     if (deleteCartItemCancelToken.current) {
-  //       deleteCartItemCancelToken.current.cancel();
-  //     }
-
-  //     if (addOrderCancelToken.current) {
-  //       addOrderCancelToken.current.cancel();
-  //     }
-  //   };
-  // });
 
   useEffect(() => {
     // Wait for the mutation to refetch to avoid seeing stale data in the orders confirmation
@@ -406,7 +142,17 @@ function Cart() {
                                       cart.length === 0
                                     }
                                     loading={deleteCartItemLoading}
-                                    onClick={() => deleteCartItem(cartItem.id)}
+                                    onClick={() =>
+                                      dispatch(
+                                        deleteCartItem(
+                                          cartItem.id,
+                                          cartDispatch,
+                                          deleteLocalCartItem,
+                                          isAuthenticated,
+                                          userToken,
+                                        ),
+                                      )
+                                    }
                                   >
                                     Remove from cart
                                   </Button>
@@ -423,10 +169,16 @@ function Cart() {
                                       cart.length === 0
                                     }
                                     onChange={(value) =>
-                                      updateCartItem({
-                                        id: cartItem.id,
-                                        quantity: Number(value),
-                                      })
+                                      dispatch(
+                                        updateCartItem(
+                                          cartItem.id,
+                                          Number(value),
+                                          cartDispatch,
+                                          updateLocalCartItem,
+                                          isAuthenticated,
+                                          userToken,
+                                        ),
+                                      )
                                     }
                                     style={{ width: "100%" }}
                                   >
@@ -485,7 +237,17 @@ function Cart() {
                         cart.length === 0
                       }
                       loading={addOrderLoading}
-                      onClick={addOrder}
+                      onClick={() =>
+                        dispatch(
+                          addOrder(
+                            currentLocalUserID,
+                            cartDispatch,
+                            resetCart,
+                            isAuthenticated,
+                            userToken,
+                          ),
+                        )
+                      }
                     >
                       Checkout
                     </Button>
