@@ -1,6 +1,6 @@
 import { useReducer } from "react";
 
-function useFirebaseState() {
+function useFirebaseReducer() {
   const types = {
     SIGN_UP: "SIGN_UP",
     SIGN_OUT: "SIGN_OUT",
@@ -74,4 +74,4 @@ function useFirebaseState() {
   return [state, dispatch, types];
 }
 
-export default useFirebaseState;
+export default useFirebaseReducer;
