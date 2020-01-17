@@ -15,18 +15,18 @@ import {
   handleItemSizeChange,
 } from "../actions/shopItem";
 
+const actions = {
+  fetchData,
+  handleAddToCart,
+  handleItemSizeChange,
+};
+
 function useShopItemReducer() {
   const [state, dispatch] = composeReducers(
     useThunk,
     useLogger,
     useReducer(ShopItemReducer, ShopItemInitialState),
   );
-
-  const actions = {
-    fetchData,
-    handleAddToCart,
-    handleItemSizeChange,
-  };
 
   return [state, dispatch, actions, ShopItemTypes];
 }

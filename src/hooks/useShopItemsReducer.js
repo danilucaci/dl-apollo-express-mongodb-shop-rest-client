@@ -10,17 +10,17 @@ import {
 } from "../reducers/shopItems";
 import { fetchMore, fetchShopItems } from "../actions/shopItems";
 
+const actions = {
+  fetchMore,
+  fetchShopItems,
+};
+
 function useShopItemsReducer() {
   const [state, dispatch] = composeReducers(
     useThunk,
     useLogger,
     useReducer(ShopItemsReducer, ShopItemsInitialState),
   );
-
-  const actions = {
-    fetchMore,
-    fetchShopItems,
-  };
 
   return [state, dispatch, actions, ShopItemsTypes];
 }

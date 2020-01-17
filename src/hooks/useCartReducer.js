@@ -11,19 +11,19 @@ import {
   deleteLocalCartItem,
 } from "../actions/cart";
 
+const actions = {
+  resetCart,
+  fetchData,
+  updateLocalCartItem,
+  deleteLocalCartItem,
+};
+
 function useCartReducer() {
   const [state, dispatch] = composeReducers(
     useThunk,
     useLogger,
     useReducer(CartReducer, CartInitialState),
   );
-
-  const actions = {
-    resetCart,
-    fetchData,
-    updateLocalCartItem,
-    deleteLocalCartItem,
-  };
 
   return [state, dispatch, actions, CartTypes];
 }

@@ -11,16 +11,16 @@ import {
 
 import { fetchData } from "../actions/orders";
 
+const actions = {
+  fetchData,
+};
+
 function useOrdersReducer() {
   const [state, dispatch] = composeReducers(
     useThunk,
     useLogger,
     useReducer(OrdersReducer, OrdersInitialState),
   );
-
-  const actions = {
-    fetchData,
-  };
 
   return [state, dispatch, actions, OrdersTypes];
 }
