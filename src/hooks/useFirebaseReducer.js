@@ -1,7 +1,5 @@
 import { useReducer } from "react";
-import useLogger from "./useLogger";
-import useThunk from "./useThunk";
-import { composeReducers } from "../utils/helpers";
+import useLoggingThunkReducer from "./useLoggingThunkReducer";
 
 import {
   FirebaseTypes,
@@ -10,9 +8,7 @@ import {
 } from "../reducers/firebase";
 
 function useFirebaseReducer() {
-  const [state, dispatch] = composeReducers(
-    useThunk,
-    useLogger,
+  const [state, dispatch] = useLoggingThunkReducer(
     useReducer(FirebaseReducer, FirebaseInitialState),
   );
 

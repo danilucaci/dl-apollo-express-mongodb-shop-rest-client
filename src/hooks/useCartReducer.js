@@ -1,7 +1,5 @@
 import { useReducer } from "react";
-import useLogger from "./useLogger";
-import useThunk from "./useThunk";
-import { composeReducers } from "../utils/helpers";
+import useLoggingThunkReducer from "./useLoggingThunkReducer";
 
 import { CartTypes, CartInitialState, CartReducer } from "../reducers/cart";
 import {
@@ -19,9 +17,7 @@ const actions = {
 };
 
 function useCartReducer() {
-  const [state, dispatch] = composeReducers(
-    useThunk,
-    useLogger,
+  const [state, dispatch] = useLoggingThunkReducer(
     useReducer(CartReducer, CartInitialState),
   );
 
