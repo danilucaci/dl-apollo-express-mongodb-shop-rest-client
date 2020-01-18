@@ -3,18 +3,18 @@ import useThunk from "./useThunk";
 import { composeReducers } from "../utils/helpers";
 
 /**
- * Runs `useLogger` and `useThunk` middleware React hooks
+ * Runs `useLogger` and `useThunk` middleware React hooks from right to left.
  *
- * @param {reducer} reducer The useReducer hook from React
+ * @param {Array} [state, dispatch] The result of calling the `useReducer` hook from React.
  *
  * @example
  *
  * const [state, dispatch] = useLoggingThunkReducer(
- *   useReducer(CartReducer, CartInitialState),
+ *   useReducer(reducer, initialState),
  * );
  */
-function useLoggingThunkReducer(reducer) {
-  return composeReducers(useThunk, useLogger, reducer);
+function useLoggingThunkReducer([state, dispatch]) {
+  return composeReducers(useThunk, useLogger)([state, dispatch]);
 }
 
 export default useLoggingThunkReducer;

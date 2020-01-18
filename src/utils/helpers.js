@@ -64,13 +64,16 @@ export function getCartSize(arr = []) {
  * @param {Array} [state, dispatch] The result of calling the `useReducer` hook
  *
  * @example
- * const [state, dispatch] = composeReducers(
- *   useThunk,
- *   useLogger,
- *   useReducer(reducer, initialState),
- * );
+ * composeReducers(useThunk, useLogger)([state, dispatch])
  *
+ * @returns {function} getStateAndDispatch A new function to get the result of calling the `useReducer` hook.
+ * @returns [state, dispatch] Enhanced `[state, dispatch]` after calling the middleware functions.
  */
 export function composeReducers(...fns) {
-  return fns.reduceRight(([state, dispatch], fn) => fn([state, dispatch]));
+  return function getStateAndDispatch([state, dispatch]) {
+    return fns.reduceRight(([state, dispatch], fn) => fn([state, dispatch]), [
+      state,
+      dispatch,
+    ]);
+  };
 }
